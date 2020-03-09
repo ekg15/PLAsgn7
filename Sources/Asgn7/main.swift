@@ -105,7 +105,13 @@ func anyeq(values: [Value]) -> Value {
 }
 */
 func env_lookup(env: Env, s: String) -> Value {
-    return Value.NumV(3)
+    if env.count == 0 {
+        return Value.StringV("DUNQ: Unbound Value")
+    } 
+    else if env[0].name == s {
+        return env[0].val
+    }
+    return env_lookup(env: Array(env[1...]), s: s)
 }
 
 struct Binding {
@@ -172,6 +178,7 @@ func list_env_extend(env: Env, params: [String], argvals: [Value]) -> Env {
 
 print("list_env_extend_test: ", list_env_extend(env: [], params: ["s", "t"], argvals: [Value.NumV(3), Value.NumV(9)]))
 print("list_interp_test: ", list_interp(args: [ExprC.numC(3), ExprC.numC(3)], env: []))
+print("env_lookup_test: ", env_lookup(env: [Binding(name: "s", val: Value.NumV(3))], s: "s"))
 
 var x = ExprC.numC(34);
 var y = ExprC.lamC(["hi", "hello"], x);
