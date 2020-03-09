@@ -1,3 +1,10 @@
+import XCTest
+import Darwin
+
+
+// Defining All Types==================================================================
+extension String: Error {}
+
 indirect enum ExprC {
     case numC(Float)
     case stringC(String)
@@ -16,23 +23,51 @@ indirect enum Value {
     case CloV([String], ExprC, Env)
     case PrimV(([Value]) -> Value)
 
-    func get_bool() -> Bool throws{
+    func get_bool() -> Bool{
+        do {
+            switch self {
+                case .NumV(_):
+                    throw "Error"
+                case .StringV(_):
+                    throw "Error"
+                case let .BoolV(val):
+                    return val
+                case .CloV(_, _, _):
+                    throw "Error"
+                case .PrimV(_):
+                    throw "Error"
+            }
+        }
+        catch {
+            print("DUNQ: conditional has non-boolean test")
+            exit(1)
+        }
+    }
+
+    func serialize() -> String {
         switch self {
-            case let .NumV(_):
-                throw "DUNQ: conditional has non-boolean test"
-            case let .StringV(_):
-                throw "DUNQ: conditional has non-boolean test"
+            case let .NumV(n):
+                return "\(n)"
+            case let .StringV(str):
+                return "\"\(str)\""
             case let .BoolV(val):
-                return val
-            case let .CloV(_, _, _):
-                throw "DUNQ: conditional has non-boolean test"
-            case let .PrimV(_):
-                throw "DUNQ: conditional has non-boolean test"
+                if val {
+                    return "true"
+                }
+                else {
+                    return "false"
+                }
+            case .CloV(_, _, _):
+                return "#<procedure>"
+            case .PrimV(_):
+                return "#<primop>"
         }
     }
 }
 
-func interp(exp: ExprC, env: Env) -> Value throws {
+// Main Interface Functions============================================================
+
+func interp(exp: ExprC, env: Env) -> Value {
     switch exp {
         case let .idC(s):
             return env_lookup(env: env, s: s)
@@ -51,18 +86,26 @@ func interp(exp: ExprC, env: Env) -> Value throws {
         case let .lamC(p, b):
             return Value.CloV(p, b, env)
         case let .appC(f, a):
-            switch interp(exp: f, env: env) {
-                case let .NumV(_):
-                    throw "DUNQ: improper function application"
-                case let .StringV(_):
-                    throw "DUNQ: improper function application"
-                case let .BoolV(_):
-                    throw "DUNQ: improper function application"
-                case let .CloV(p, b, clo_env):
-                    let argvals = list_interp(args: a, env: env)
-                    let env2 = list_env_extend(env: clo_env, params: p, argvals: argvals)
-                case let .PrimV(_):
-                    return false
+            do {
+                switch interp(exp: f, env: env) {
+                    case .NumV(_):
+                        throw "error"
+                    case .StringV(_):
+                        throw "error"
+                    case .BoolV(_):
+                        throw "error"
+                    case let .CloV(p, b, clo_env):
+                        let argvals = list_interp(args: a, env: env)
+                        let env2 = list_env_extend(env: clo_env, params: p, argvals: argvals)
+                        return interp(exp: b, env: env2)
+                    case let .PrimV(primF):
+                        let argvals = list_interp(args: a, env: env)
+                        return primF(argvals)
+                }
+            }
+            catch {
+                print("DUNQ: improper function application")
+                exit(1)
             }
     }
 }
@@ -71,5 +114,13 @@ func env_lookup(env: Env, s: String) -> Value {
     return Value.NumV(3)
 }
 
-var x = ExprC.numC(34);
-var y = ExprC.lamC(["hi", "hello"], x);
+func list_interp(args: [ExprC], env: Env) -> [Value] {
+    return [Value.NumV(3), Value.NumV(3)]
+}
+
+func list_env_extend(env: Env, params: [String], argvals: [Value]) -> Env {
+    return ["he" : Value.NumV(3)]
+}
+
+
+// Testing=============================================================================
