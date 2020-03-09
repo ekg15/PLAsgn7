@@ -184,7 +184,7 @@ func anyeq(values: [Value]) -> Value {
                     return BoolV(l == b)
                 }
                 else {
-                    throw
+                    throw "DUNQ: anyeq: wrong pattern"
                 }
                 throw "DUNQ: anyeq: wrong pattern"
             case .CloV(_, _, _):
