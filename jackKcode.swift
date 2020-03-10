@@ -1,13 +1,13 @@
 // top environment for program
 let top_env =  Env[
-    "true" : BoolV(true),
-    "false" : BoolV(false),
-    "+" : PrimV(numPlus),
-    "-" : PrimV(numMinus),
-    "*" : PrimV(numMult),
-    "/" : PrimV(numDivide),
-    "<=" : PrimV(numleq),
-    "equal?" : PrimV(anyeq)
+    "true" : Value.BoolV(true),
+    "false" : Value.BoolV(false),
+    "+" : Value.PrimV(numPlus),
+    "-" : Value.PrimV(numMinus),
+    "*" : Value.PrimV(numMult),
+    "/" : Value.PrimV(numDivide),
+    "<=" : Value.PrimV(numleq),
+    "equal?" : Value.PrimV(anyeq)
 ]
 
 // sum of two NumVs, returns error if not NumVs or wrong pattern
